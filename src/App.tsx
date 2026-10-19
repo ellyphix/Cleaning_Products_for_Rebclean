@@ -113,7 +113,7 @@ function Header() {
       }
 
       const heroBottom = hero.getBoundingClientRect().bottom + window.scrollY;
-      setIsScrolled(window.scrollY >= heroBottom - header.offsetHeight);
+      setIsScrolled(window.scrollY >= heroBottom - (header.offsetHeight * 2));
     };
 
     updateScrollState();

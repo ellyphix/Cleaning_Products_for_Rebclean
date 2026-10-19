@@ -3378,7 +3378,9 @@ p {
     border: 1px solid var(--line);
     border-right: 0;
     border-bottom-left-radius: 14px;
-    background: #f8fbfcfa;
+    background: rgba(248, 251, 252, .78);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   }
 
   .mobile-nav a {
