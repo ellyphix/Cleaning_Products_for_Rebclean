@@ -239,47 +239,95 @@ function EnquiryForm({ wholesale = false }: { wholesale?: boolean }) {
   const [status, setStatus] = useState<FormStatus>('idle');
   const [error, setError] = useState('');
   const [submittedName, setSubmittedName] = useState('');
+  const [submittedWhatsAppMessage, setSubmittedWhatsAppMessage] = useState('');
+  const isSubmitting = useRef(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus('sending');
+    if (isSubmitting.current) return;
+
     setError('');
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const name = String(form.get('name') || '').trim();
     const email = String(form.get('email') || '').trim();
     const message = String(form.get('message') || '').trim();
+    const subject = String(form.get('subject') || '').trim();
+    const businessName = String(form.get('business_name') || '').trim();
+    const phone = String(form.get('phone') || '').trim();
     const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-    if (!name || name.length > 100 || !emailIsValid || email.length > 254 || !message || message.length > 4000) {
-      setError('Please complete your name, a valid email and your message.');
+    if (
+      !name || name.length > 100 || !emailIsValid || email.length > 254 ||
+      !message || message.length > 4000 || subject.length > 150 ||
+      businessName.length > 200 || phone.length > 32
+    ) {
+      setError('Please check your details. Enter your name, a valid email and a message, and keep each field within its limit.');
       setStatus('error');
       return;
     }
+
     const table = wholesale ? 'wholesale_enquiries' : 'contact_messages';
     const payload = wholesale
-      ? { name, email, phone: String(form.get('phone') || '').trim(), business_name: String(form.get('business_name') || '').trim(), message }
-      : { name, email, subject: String(form.get('subject') || '').trim(), message };
+      ? { name, email, phone, business_name: businessName, message }
+      : { name, email, subject, message };
+    const whatsappMessage = [
+      `Hello Rebclean Solutions, I have submitted a ${wholesale ? 'wholesale and partnership' : 'contact'} enquiry through your website.`,
+      `Name: ${name}`,
+      `Email: ${email}`,
+      ...(wholesale
+        ? [`Business name: ${businessName || 'Not provided'}`, `Phone: ${phone || 'Not provided'}`]
+        : [`Subject: ${subject || 'Not provided'}`]),
+      'Enquiry:',
+      message,
+    ].join('\n');
+
+    isSubmitting.current = true;
+    setStatus('sending');
+    // Reserve a tab during the form gesture so browsers do not block WhatsApp
+    // after the asynchronous database request completes.
+    let whatsappWindow: Window | null = null;
+    try {
+      whatsappWindow = window.open('about:blank', '_blank');
+      if (whatsappWindow) {
+        whatsappWindow.opener = null;
+        whatsappWindow.document.title = 'Preparing WhatsApp message';
+      }
+    } catch {
+      // The success screen below still provides a direct WhatsApp link.
+    }
+
     try {
       const { error: insertError } = await supabase.from(table).insert(payload);
       if (insertError) throw insertError;
+
+      setSubmittedWhatsAppMessage(whatsappMessage);
       setSubmittedName(name);
       setStatus('success');
       formElement.reset();
+      if (whatsappWindow && !whatsappWindow.closed) {
+        try {
+          whatsappWindow.location.replace(whatsappUrl(whatsappMessage));
+        } catch {
+          // Keep the success screen's WhatsApp link available as a fallback.
+        }
+      }
     } catch {
-      setError('We couldn’t send that just now. Please try WhatsApp instead.');
+      if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
+      setError('We couldn’t confirm that your enquiry was saved. Please try again in a moment or contact us directly.');
       setStatus('error');
+    } finally {
+      isSubmitting.current = false;
     }
   }
 
   if (status === 'success') {
     return (
-      <div className="form-success"><div><Check /></div><span className="eyebrow"><span />Message received</span><h3>Thanks, {submittedName.split(' ')[0]}.</h3><p>We’ll get back to you as soon as possible. If it’s urgent, you can also reach us directly on WhatsApp.</p><a className="button" href={whatsappUrl(wholesale ? 'Hello Rebclean Solutions, I am interested in wholesale and partnerships.' : "Hello Rebclean Solutions, I’d like to learn more about your products.")} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Chat on WhatsApp</a><button className="form-reset" onClick={() => setStatus('idle')}>Send another message</button></div>
+      <div className="form-success"><div><Check /></div><span className="eyebrow"><span />Message received</span><h3>Thanks, {submittedName.split(' ')[0]}.</h3><p>We’ll get back to you as soon as possible. Your enquiry has been saved. WhatsApp will open with your details ready for you to send.</p><a className="button" href={whatsappUrl(submittedWhatsAppMessage)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Open WhatsApp to send</a><button className="form-reset" onClick={() => { setStatus('idle'); setSubmittedWhatsAppMessage(''); }}>Send another message</button></div>
     );
   }
 
   return <form className="enquiry-form" onSubmit={submit} noValidate><div className="form-grid"><label>Your name<input name="name" required maxLength={100} placeholder="Jane Doe" /></label><label>Email address<input name="email" type="email" required maxLength={254} placeholder="jane@example.com" /></label>{wholesale && <><label>Business name<input name="business_name" maxLength={200} placeholder="Your business" /></label><label>Phone number<input name="phone" type="tel" maxLength={32} placeholder="+254 ..." /></label></>}</div>{!wholesale && <label>Subject<input name="subject" maxLength={150} placeholder="How can we help?" /></label>}<label>Your message<textarea name="message" required maxLength={4000} rows={5} placeholder={wholesale ? 'Tell us a little about your business or requirements...' : 'Tell us what you need...'} /></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="button" type="submit" disabled={status === 'sending'}>{status === 'sending' ? 'Sending...' : wholesale ? 'Send partnership enquiry' : 'Send message'}<ArrowRight size={17} /></button><p className="form-footnote">Submitting this form lets Rebclean Solutions use your details to respond to your enquiry. See our <a href="/privacy-policy">Privacy Policy</a> for details.</p></form>;
 }
-
 function WholesalePage() { return <PageShell><section className="page-hero wholesale-hero"><div><span className="eyebrow"><span />Wholesale & partnerships</span><h1>Let’s make clean<br /><em>move further.</em></h1><p>For retailers, cleaning businesses and teams looking to bring Rebclean into more everyday spaces.</p><a className="button" href={whatsappUrl('Hello Rebclean Solutions, I am interested in wholesale and partnerships.')} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Start on WhatsApp</a></div><div className="wholesale-art"><div className="art-circle" /><span>For<br />bigger<br /><em>clean.</em></span></div></section><section className="wholesale-content section-wrap"><div className="wholesale-aside"><span className="eyebrow"><span />Partner with us</span><h2>Good things<br /><em>start here.</em></h2><p>Share a little about what you’re looking for. Our team will follow up with the right next step.</p><div className="aside-line"><MessageCircle size={17} /><span>Prefer a quick conversation?<br /><a href={whatsappUrl('Hello Rebclean Solutions, I am interested in wholesale and partnerships.')} target="_blank" rel="noreferrer">Message us directly</a></span></div></div><div className="form-card"><EnquiryForm wholesale /></div></section></PageShell>; }
 
 function ContactPage() { return <PageShell><section className="contact-hero"><div><span className="eyebrow"><span />Contact Rebclean</span><h1>We’re here for<br /><em>the clean stuff.</em></h1><p>Have a product question, a partnership idea or simply want to say hello? We’d love to hear from you.</p></div><div className="contact-details"><a href={whatsappUrl('Hello Rebclean Solutions, I\'d like to learn more about your products.')} target="_blank" rel="noreferrer"><MessageCircle /><span><small>WhatsApp</small>+254 791 088212</span><ArrowRight /></a><a href="tel:+254791088212"><Phone /><span><small>Telephone</small>+254 791 088212</span><ArrowRight /></a></div></section><section className="contact-form-section section-wrap"><div className="contact-form-heading"><span className="eyebrow"><span />Send a message</span><h2>Let’s start<br /><em>a conversation.</em></h2><div className="contact-note"><Mail size={17} /><span>Business email and location will be shared here once confirmed.</span></div><div className="contact-note"><MapPin size={17} /><span>Serving homes and workplaces across Kenya.</span></div></div><div className="form-card"><EnquiryForm /></div></section></PageShell>; }
