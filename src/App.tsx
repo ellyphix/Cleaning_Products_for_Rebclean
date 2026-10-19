@@ -104,10 +104,25 @@ function Header() {
 
   useEffect(() => {
     if (!isHome) return;
-    const updateScrollState = () => setIsScrolled(window.scrollY > 24);
+    const updateScrollState = () => {
+      const hero = document.querySelector<HTMLElement>('.hero');
+      const header = document.querySelector<HTMLElement>('.site-header-home');
+      if (!hero || !header) {
+        setIsScrolled(false);
+        return;
+      }
+
+      const heroBottom = hero.getBoundingClientRect().bottom + window.scrollY;
+      setIsScrolled(window.scrollY >= heroBottom - header.offsetHeight);
+    };
+
     updateScrollState();
     window.addEventListener('scroll', updateScrollState, { passive: true });
-    return () => window.removeEventListener('scroll', updateScrollState);
+    window.addEventListener('resize', updateScrollState);
+    return () => {
+      window.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+    };
   }, [isHome]);
 
   useEffect(() => {

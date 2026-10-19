@@ -309,9 +309,11 @@ button {
   cursor: pointer
 }
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 20;
+  right: 0;
+  left: 0;
+  z-index: 1000;
   height: 82px;
   display: flex;
   align-items: center;
@@ -321,6 +323,12 @@ button {
   border-bottom: 1px solid rgba(18,61,104,.08);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px)
+}
+.site-header:not(.site-header-home) + main {
+  padding-top: 82px;
+}
+.site-header-home + main {
+  padding-top: 0;
 }
 .logo {
   width: 139px;
@@ -1715,6 +1723,9 @@ p {
     height: 70px;
     padding: 0 20px
   }
+  .site-header:not(.site-header-home) + main {
+    padding-top: 70px;
+  }
   .logo {
     width: 116px;
     height: 62px
@@ -2315,7 +2326,7 @@ p {
   top: 0;
   right: 0;
   left: 0;
-  height: 110px;
+  height: 102px;
   padding-right: clamp(24px,5.3vw,96px);
   padding-left: clamp(24px,5.3vw,96px);
   background: transparent;
@@ -2324,8 +2335,7 @@ p {
   backdrop-filter: none;
   transition: background .25s ease, border-color .25s ease, backdrop-filter .25s ease;
 }
-.site-header-home.is-scrolled,
-.site-header-home.menu-open {
+.site-header-home.is-scrolled {
   background: #f8fbfce8;
   border-bottom-color: rgba(18,61,104,.08);
   -webkit-backdrop-filter: blur(18px);
@@ -2834,7 +2844,7 @@ p {
 }
 @media (max-width: 640px) {
   .site-header-home {
-    height: 70px;
+    height: 64px;
     padding: 0 20px;
   }
   .site-header-home .logo-primary {
@@ -2967,7 +2977,8 @@ p {
     filter: none;
   }
   .site-header-home.menu-open .mobile-nav {
-    top: 70px;
+    top: 64px;
+    max-height: calc(100dvh - 64px);
   }
 }
 @media (max-width: 640px) { .hero-products { order: 0; } .hero-copy { order: 1; } }
@@ -3343,6 +3354,19 @@ p {
 
 /* Keep the mobile navigation as a compact right-side panel. */
 @media (max-width: 640px) {
+  .site-header-home {
+    position: fixed;
+    top: 0;
+    z-index: 40;
+    transform: none;
+  }
+
+  .site-header-home.is-scrolled {
+    background: #f8fbfc;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
   .mobile-nav {
     left: auto;
     right: 0;
