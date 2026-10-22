@@ -471,8 +471,9 @@ function App() {
       document.head.append(openGraphUrl);
     }
     openGraphUrl.content = canonicalUrl;
-    document.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.setAttribute('content', new URL('/Rebclean_Cleaning_Products_Brand_Showcase.png', window.location.origin).href);
-    document.querySelector<HTMLMetaElement>('meta[name="twitter:image"]')?.setAttribute('content', new URL('/Rebclean_Cleaning_Products_Brand_Showcase.png', window.location.origin).href);
+    const socialLogo = new URL('/rebclean-primary-logo-clean.png', window.location.origin).href;
+    document.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.setAttribute('content', socialLogo);
+    document.querySelector<HTMLMetaElement>('meta[name="twitter:image"]')?.setAttribute('content', socialLogo);
   }, [metadata, path]);
 
   if (guide) return <UseGuidePage guide={guide} />;
