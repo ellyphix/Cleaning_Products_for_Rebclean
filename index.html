@@ -14,41 +14,9 @@
     <meta name="twitter:description" content="Everyday cleaning essentials for homes and workplaces." />
     <meta name="twitter:image" content="/Rebclean_Cleaning_Products_Brand_Showcase.png" />
     <link rel="preload" as="image" href="/rebclean-primary-logo-clean.png" fetchpriority="high" />
-    <style>
-      html, body { min-height: 100%; margin: 0; background: #f8fbfc; }
-      .app-loading { position: fixed; inset: 0; z-index: 9999; display: grid; align-content: center; justify-items: center; gap: 14px; background: #f8fbfc; color: #123d68; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 180ms ease, visibility 180ms ease; }
-      .app-loading.is-visible { opacity: 1; visibility: visible; pointer-events: auto; }
-      .app-loading img { display: block; width: 132px; height: auto; }
-      .app-loading-label { color: #087e73; font: 600 12px/1.4 Arial, sans-serif; letter-spacing: .08em; }
-      .app-loading-bar { width: 88px; height: 3px; overflow: hidden; border-radius: 3px; background: #d9eeec; }
-      .app-loading-bar::after { content: ""; display: block; width: 45%; height: 100%; border-radius: inherit; background: #24bfc7; animation: app-loading-progress 1s ease-in-out infinite alternate; }
-      .app-loading.is-ready { opacity: 0; visibility: hidden; pointer-events: none; }
-      @keyframes app-loading-progress { from { transform: translateX(-8px); } to { transform: translateX(62px); } }
-      @media (prefers-reduced-motion: reduce) { .app-loading-bar::after { animation: none; width: 100%; } }
-    </style>
   </head>
   <body>
-    <div id="app-loading" class="app-loading" role="status" aria-label="Loading Rebclean Solutions">
-      <img src="/rebclean-primary-logo-clean.png" alt="Rebclean Solutions" width="132" fetchpriority="high" />
-      <span class="app-loading-label">CLEAN LIVING. MADE AFFORDABLE.</span>
-      <span class="app-loading-bar" aria-hidden="true"></span>
-    </div>
-    <script>
-      (() => {
-        const loader = document.getElementById('app-loading');
-        const timer = window.setTimeout(() => loader?.classList.add('is-visible'), 2000);
-        window.addEventListener('rebclean:app-ready', () => {
-          window.clearTimeout(timer);
-          if (!loader) return;
-          if (loader.classList.contains('is-visible')) {
-            loader.classList.add('is-ready');
-            window.setTimeout(() => loader.remove(), 220);
-          } else {
-            loader.remove();
-          }
-        }, { once: true });
-      })();
-    </script>    <div id="root"></div>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
