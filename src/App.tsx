@@ -416,7 +416,7 @@ function PrivacyPage() {
 function NotFoundPage() { return <PageShell><section className="not-found"><Droplets /><span className="eyebrow"><span />404</span><h1>That page is<br /><em>out of reach.</em></h1><ButtonLink href="/">Back home</ButtonLink></section></PageShell>; }
 
 const routeMetadata: Record<string, { title: string; description: string }> = {
-  '/': { title: 'Rebclean Solutions | Clean Living. Made Affordable.', description: 'Everyday cleaning essentials for homes and workplaces from Rebclean Solutions.' },
+  '/': { title: 'Rebclean Solutions', description: 'Clean Living. Made Affordable.' },
   '/products': { title: 'Cleaning Products for Everyday Use | Rebclean Solutions', description: 'Explore Rebclean hand care, kitchen, home and laundry cleaning essentials.' },
   '/uses': { title: 'Everyday Cleaning Uses & Solutions | Rebclean Solutions', description: 'Explore simple cleaning routines for handwashing, laundry, dishwashing and household care.' },
   '/about': { title: 'About Rebclean Solutions | Everyday Clean', description: 'Learn about Rebclean Solutions and our approach to accessible everyday cleaning essentials.' },
