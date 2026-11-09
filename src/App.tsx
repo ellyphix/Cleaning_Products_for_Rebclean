@@ -12,7 +12,6 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 
 type Product = {
   name: string;
@@ -23,7 +22,7 @@ type Product = {
   tone: string;
 };
 
-type FormStatus = 'idle' | 'sending' | 'success' | 'error';
+type FormStatus = 'idle' | 'success' | 'error';
 
 const whatsappNumber = '254791088212';
 const whatsappUrl = (message: string) => `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
@@ -213,11 +212,11 @@ function HomePage() {
   return <PageShell><section className="hero" aria-label="Rebclean Solutions cleaning products"><div className="hero-copy"><h1 aria-label="Rebclean Solutions"><span>Rebclean</span><span>Solutions</span></h1><p className="hero-tagline">Clean Living. Made Affordable.</p><div className="hero-mobile-actions"><a className="hero-mobile-cta hero-mobile-cta-primary" href="/products">View Products <ArrowRight size={20} /></a><a className="hero-mobile-cta hero-mobile-cta-secondary" href={whatsappUrl('Hello Rebclean Solutions, I\'d like to learn more about your products.')} target="_blank" rel="noreferrer"><MessageCircle size={20} /> Chat with us</a></div></div><div className="hero-products" aria-label="Rebclean cleaning products">{heroProducts.map((product) => <div className={`hero-product hero-product-${product.size}`} key={product.size}><img src={product.image} alt={product.name} /><img className="hero-reflection" src={product.image} alt="" aria-hidden="true" /></div>)}</div></section><section className="home-range section-wrap"><SectionIntro eyebrow="The everyday range" title="A cleaner feeling, in every corner." text="From the kitchen sink to the laundry room, Rebclean brings simple, dependable cleaning into the moments that make up your day." /><div className="range-grid">{products.map((product, index) => <article className={`range-card range-product-card range-${index % 3 + 1}`} key={product.name}><div className="range-product-image"><img src={product.image} alt={product.name} loading="lazy" /></div><div className="range-product-copy"><div className="range-number">0{index + 1}</div><div><span>{product.category}</span><h3>{product.name}</h3><a href="/products#catalogue">Discover range <ArrowRight size={14} /></a></div></div></article>)}</div></section><section className="home-partner"><div className="partner-watermark"><Leaf /></div><div><span className="eyebrow"><span />For retailers & bulk buyers</span><h2>Bring a better clean<br /><em>to more people.</em></h2><p>Interested in stocking Rebclean or buying for your workplace? Let’s start a conversation.</p><ButtonLink href="/wholesale">Explore partnerships</ButtonLink></div><div className="partner-mark"><Logo badge /></div></section><section className="home-contact section-wrap"><div><span className="eyebrow"><span />Let’s talk</span><h2>Questions? We’re<br /><em>just a message away.</em></h2></div><a className="contact-orb" href={whatsappUrl('Hello Rebclean Solutions, I\'d like to learn more about your products.')} target="_blank" rel="noreferrer"><MessageCircle /><span>Chat with Rebclean<br />on WhatsApp</span><ArrowRight /></a></section></PageShell>;
 }
 const productAnchor = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-function ProductCard({ product, onOpen, eager = false, priority = false }: { product: Product; onOpen: (product: Product) => void; eager?: boolean; priority?: boolean }) { return <article id={productAnchor(product.name)} className="product-card"><button className={`product-image tone-${product.tone}`} onClick={() => onOpen(product)} aria-label={`View ${product.name}`}><img src={product.image} alt="" loading={eager ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} decoding="async" /><span className="product-chip">{product.category}</span></button><div className="product-card-copy"><div><h3>{product.name}</h3><p>{product.description}</p></div><span className="product-size">{product.size}</span><a href={whatsappUrl(`Hello Rebclean Solutions, I'd like to enquire about the ${product.name}.`)} target="_blank" rel="noreferrer" className="product-enquire"><MessageCircle size={15} /> Enquire</a></div></article>; }
+function ProductCard({ product, onOpen, priority = false }: { product: Product; onOpen: (product: Product) => void; priority?: boolean }) { return <article id={productAnchor(product.name)} className="product-card"><button className={`product-image tone-${product.tone}`} onClick={() => onOpen(product)} aria-label={`View ${product.name}`}><img src={product.image} alt="" loading="eager" fetchPriority={priority ? 'high' : 'auto'} decoding="async" /><span className="product-chip">{product.category}</span></button><div className="product-card-copy"><div><h3>{product.name}</h3><p>{product.description}</p></div><span className="product-size">{product.size}</span><a href={whatsappUrl(`Hello Rebclean Solutions, I'd like to enquire about the ${product.name}.`)} target="_blank" rel="noreferrer" className="product-enquire"><MessageCircle size={15} /> Enquire</a></div></article>; }
 
 function ProductsPage() {
   const [filter, setFilter] = useState('All products'); const [selected, setSelected] = useState<Product | null>(null); const categories = ['All products', ...Array.from(new Set(products.map((product) => product.category)))]; const visibleProducts = useMemo(() => filter === 'All products' ? products : products.filter((product) => product.category === filter), [filter]);
-  return <PageShell><section className="page-hero products-page-hero"><div><span className="eyebrow"><span />Our collection</span><h1>Made for the<br /><em>everyday clean.</em></h1><p>A considered range of cleaning essentials for the places you call home, work and everywhere in between.</p></div><div className="products-hero-visual"><img src="/optimized/rebclean-home-lifestyle.webp" alt="Woman holding Rebclean Hand Wash" fetchPriority="high" decoding="async" /></div></section><section id="catalogue" className="catalogue products-catalogue section-wrap"><div className="catalogue-head"><div><span className="eyebrow"><span />Explore the range</span><h2>Find your clean.</h2></div><div className="filter-list" role="group" aria-label="Filter products">{categories.map((category) => <button className={filter === category ? 'selected' : ''} onClick={() => setFilter(category)} key={category}>{category}</button>)}</div></div><div className="product-grid">{visibleProducts.map((product, index) => <ProductCard product={product} onOpen={setSelected} eager={index < 3} priority={index === 0} key={product.name} />)}</div></section>{selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><div className="product-modal" onClick={(event) => event.stopPropagation()}><button className="modal-close" aria-label="Close product details" onClick={() => setSelected(null)}><X /></button><div className={`modal-image tone-${selected.tone}`}><img src={selected.image} alt={`${selected.name} product range`} /></div><div className="modal-copy"><span className="eyebrow"><span />{selected.category}</span><h2>{selected.name}</h2><p>{selected.description}</p><div className="detail-row"><span>Product size</span><strong>{selected.size}</strong></div><div className="placeholder-note"><Sparkles size={16} /> Please enquire for current product sizes and details.</div><a className="button" href={whatsappUrl(`Hello Rebclean Solutions, I'd like to enquire about the ${selected.name}.`)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Enquire on WhatsApp</a></div></div></div>}</PageShell>;
+  return <PageShell><section className="page-hero products-page-hero"><div><span className="eyebrow"><span />Our collection</span><h1>Made for the<br /><em>everyday clean.</em></h1><p>A considered range of cleaning essentials for the places you call home, work and everywhere in between.</p></div><div className="products-hero-visual"><img src="/optimized/rebclean-home-lifestyle.webp" alt="Woman holding Rebclean Hand Wash" fetchPriority="high" decoding="async" /></div></section><section id="catalogue" className="catalogue products-catalogue section-wrap"><div className="catalogue-head"><div><span className="eyebrow"><span />Explore the range</span><h2>Find your clean.</h2></div><div className="filter-list" role="group" aria-label="Filter products">{categories.map((category) => <button className={filter === category ? 'selected' : ''} onClick={() => setFilter(category)} key={category}>{category}</button>)}</div></div><div className="product-grid">{visibleProducts.map((product, index) => <ProductCard product={product} onOpen={setSelected} priority={index === 0} key={product.name} />)}</div></section>{selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><div className="product-modal" onClick={(event) => event.stopPropagation()}><button className="modal-close" aria-label="Close product details" onClick={() => setSelected(null)}><X /></button><div className={`modal-image tone-${selected.tone}`}><img src={selected.image} alt={`${selected.name} product range`} /></div><div className="modal-copy"><span className="eyebrow"><span />{selected.category}</span><h2>{selected.name}</h2><p>{selected.description}</p><div className="detail-row"><span>Product size</span><strong>{selected.size}</strong></div><div className="placeholder-note"><Sparkles size={16} /> Please enquire for current product sizes and details.</div><a className="button" href={whatsappUrl(`Hello Rebclean Solutions, I'd like to enquire about the ${selected.name}.`)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Enquire on WhatsApp</a></div></div></div>}</PageShell>;
 }
 
 const solutions = [
@@ -287,11 +286,8 @@ function EnquiryForm({ wholesale = false }: { wholesale?: boolean }) {
   const [error, setError] = useState('');
   const [submittedName, setSubmittedName] = useState('');
   const [submittedWhatsAppMessage, setSubmittedWhatsAppMessage] = useState('');
-  const isSubmitting = useRef(false);
-
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isSubmitting.current) return;
 
     setError('');
     const formElement = event.currentTarget;
@@ -313,10 +309,6 @@ function EnquiryForm({ wholesale = false }: { wholesale?: boolean }) {
       return;
     }
 
-    const table = wholesale ? 'wholesale_enquiries' : 'contact_messages';
-    const payload = wholesale
-      ? { name, email, phone, business_name: businessName, message }
-      : { name, email, subject, message };
     const whatsappMessage = [
       `Hello Rebclean Solutions, I have submitted a ${wholesale ? 'wholesale and partnership' : 'contact'} enquiry through your website.`,
       `Name: ${name}`,
@@ -328,52 +320,27 @@ function EnquiryForm({ wholesale = false }: { wholesale?: boolean }) {
       message,
     ].join('\n');
 
-    isSubmitting.current = true;
-    setStatus('sending');
-    // Reserve a tab during the form gesture so browsers do not block WhatsApp
-    // after the asynchronous database request completes.
-    let whatsappWindow: Window | null = null;
+    setSubmittedWhatsAppMessage(whatsappMessage);
+    setSubmittedName(name);
     try {
-      whatsappWindow = window.open('about:blank', '_blank');
+      const whatsappWindow = window.open(whatsappUrl(whatsappMessage), '_blank');
       if (whatsappWindow) {
         whatsappWindow.opener = null;
-        whatsappWindow.document.title = 'Preparing WhatsApp message';
       }
     } catch {
       // The success screen below still provides a direct WhatsApp link.
     }
-
-    try {
-      const { error: insertError } = await supabase.from(table).insert(payload);
-      if (insertError) throw insertError;
-
-      setSubmittedWhatsAppMessage(whatsappMessage);
-      setSubmittedName(name);
-      setStatus('success');
-      formElement.reset();
-      if (whatsappWindow && !whatsappWindow.closed) {
-        try {
-          whatsappWindow.location.replace(whatsappUrl(whatsappMessage));
-        } catch {
-          // Keep the success screen's WhatsApp link available as a fallback.
-        }
-      }
-    } catch {
-      if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
-      setError('We couldn’t confirm that your enquiry was saved. Please try again in a moment or contact us directly.');
-      setStatus('error');
-    } finally {
-      isSubmitting.current = false;
-    }
+    setStatus('success');
+    formElement.reset();
   }
 
   if (status === 'success') {
     return (
-      <div className="form-success"><div><Check /></div><span className="eyebrow"><span />Message received</span><h3>Thanks, {submittedName.split(' ')[0]}.</h3><p>We’ll get back to you as soon as possible. Your enquiry has been saved. WhatsApp will open with your details ready for you to send.</p><a className="button" href={whatsappUrl(submittedWhatsAppMessage)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Open WhatsApp to send</a><button className="form-reset" onClick={() => { setStatus('idle'); setSubmittedWhatsAppMessage(''); }}>Send another message</button></div>
+      <div className="form-success"><div><Check /></div><span className="eyebrow"><span />WhatsApp message prepared</span><h3>Thanks, {submittedName.split(' ')[0]}.</h3><p>WhatsApp should open with your details ready. Send the message there to deliver your enquiry to Rebclean Solutions.</p><a className="button" href={whatsappUrl(submittedWhatsAppMessage)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Open WhatsApp</a><button className="form-reset" onClick={() => { setStatus('idle'); setSubmittedWhatsAppMessage(''); }}>Send another message</button></div>
     );
   }
 
-  return <form className="enquiry-form" onSubmit={submit} noValidate><div className="form-grid"><label>Your name<input name="name" required maxLength={100} placeholder="Jane Doe" /></label><label>Email address<input name="email" type="email" required maxLength={254} placeholder="jane@example.com" /></label>{wholesale && <><label>Business name<input name="business_name" maxLength={200} placeholder="Your business" /></label><label>Phone number<input name="phone" type="tel" maxLength={32} placeholder="+254 ..." /></label></>}</div>{!wholesale && <label>Subject<input name="subject" maxLength={150} placeholder="How can we help?" /></label>}<label>Your message<textarea name="message" required maxLength={4000} rows={5} placeholder={wholesale ? 'Tell us a little about your business or requirements...' : 'Tell us what you need...'} /></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="button" type="submit" disabled={status === 'sending'}>{status === 'sending' ? 'Sending...' : wholesale ? 'Send partnership enquiry' : 'Send message'}<ArrowRight size={17} /></button><p className="form-footnote">Submitting this form lets Rebclean Solutions use your details to respond to your enquiry. See our <a href="/privacy-policy">Privacy Policy</a> for details.</p></form>;
+  return <form className="enquiry-form" onSubmit={submit} noValidate><div className="form-grid"><label>Your name<input name="name" required maxLength={100} placeholder="Jane Doe" /></label><label>Email address<input name="email" type="email" required maxLength={254} placeholder="jane@example.com" /></label>{wholesale && <><label>Business name<input name="business_name" maxLength={200} placeholder="Your business" /></label><label>Phone number<input name="phone" type="tel" maxLength={32} placeholder="+254 ..." /></label></>}</div>{!wholesale && <label>Subject<input name="subject" maxLength={150} placeholder="How can we help?" /></label>}<label>Your message<textarea name="message" required maxLength={4000} rows={5} placeholder={wholesale ? 'Tell us a little about your business or requirements...' : 'Tell us what you need...'} /></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="button" type="submit">{wholesale ? 'Send partnership enquiry' : 'Send message'}<ArrowRight size={17} /></button><p className="form-footnote">Selecting send opens WhatsApp with your details. You must send the message in WhatsApp for Rebclean Solutions to receive it. See our <a href="/privacy-policy">Privacy Policy</a> for details.</p></form>;
 }
 function WholesalePage() { return <PageShell><section className="page-hero wholesale-hero"><div><span className="eyebrow"><span />Wholesale & partnerships</span><h1>Let’s make clean<br /><em>move further.</em></h1><p>For retailers, cleaning businesses and teams looking to bring Rebclean into more everyday spaces.</p><a className="button" href={whatsappUrl('Hello Rebclean Solutions, I am interested in wholesale and partnerships.')} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Start on WhatsApp</a></div><div className="wholesale-art"><div className="art-circle" /><span>For<br />bigger<br /><em>clean.</em></span></div></section><section className="wholesale-content section-wrap"><div className="wholesale-aside"><span className="eyebrow"><span />Partner with us</span><h2>Good things<br /><em>start here.</em></h2><p>Share a little about what you’re looking for. Our team will follow up with the right next step.</p><div className="aside-line"><MessageCircle size={17} /><span>Prefer a quick conversation?<br /><a href={whatsappUrl('Hello Rebclean Solutions, I am interested in wholesale and partnerships.')} target="_blank" rel="noreferrer">Message us directly</a></span></div></div><div className="form-card"><EnquiryForm wholesale /></div></section></PageShell>; }
 
@@ -401,10 +368,10 @@ function TermsPage() {
 function PrivacyPage() {
   return <PageShell><PolicyPageHeader eyebrow="Your information" title="Privacy Policy" intro="This notice describes the personal information handled through the Rebclean Solutions website and enquiries, and the choices and rights available to you under Kenyan data protection law." /><article className="policy-content">
     <section><h2>1. Who is responsible for your information?</h2><p>Rebclean Solutions is responsible for personal information collected through this website. You can contact us about privacy through the <a href="/contact">Contact Us page</a> or by calling <a href="tel:+254791088212">+254 791 088212</a>.</p><p>This notice is based on the website’s current features. It should be updated if the controller, services, providers or information practices change.</p></section>
-    <section><h2>2. Information collected</h2><ul><li>When you use the contact form: your name, email address, message, and any subject you choose to provide.</li><li>When you use the wholesale enquiry form: your name, email address, message, and any business name or phone number you choose to provide.</li><li>If you contact us by phone or WhatsApp: the contact details and message contents you choose to share through those services.</li><li>Our website and service providers may collect technical information, such as server logs or cookies, where needed to operate, protect and troubleshoot the site.</li></ul><p>The website currently has no customer account, cart or online payment checkout. Do not include payment card details, passwords or sensitive personal information in an enquiry.</p></section>
+    <section><h2>2. Information collected</h2><ul><li>The contact form asks for your name, email address and message, plus an optional subject.</li><li>The wholesale enquiry form asks for your name, email address and message, plus optional business name and phone number.</li><li>When you choose to open WhatsApp from a form, those details are included in a draft message. Rebclean Solutions receives them only if you send the message in WhatsApp.</li><li>If you contact us by phone or WhatsApp, we receive the contact details and message contents you choose to share.</li><li>Our website and service providers may collect technical information, such as server logs or cookies, where needed to operate, protect and troubleshoot the site.</li></ul><p>The website currently has no customer account, cart or online payment checkout. Do not include payment card details, passwords or sensitive personal information in an enquiry.</p></section>
     <section><h2>3. Why we use information</h2><p>We use enquiry details to respond to questions, discuss product availability and quotations, consider wholesale requests, communicate about an order if one is agreed, keep appropriate business records, and protect or troubleshoot the website. We will use personal information only for specified, lawful purposes and in a way that is relevant and proportionate, as required by the Data Protection Act, 2019.</p><p>Depending on the interaction, processing may be necessary to take steps you request before entering a contract, perform an agreed contract, meet a legal obligation, pursue a legitimate interest such as responding to a customer enquiry or protecting the service, or act on consent where consent is the appropriate basis. If we later introduce optional marketing, we will explain it separately and provide a way to withdraw consent.</p></section>
-    <section><h2>4. How information is stored and protected</h2><p>We currently use Supabase to store contact and wholesale enquiries. We apply reasonable technical and organisational safeguards and limit access to people who need the information to respond to enquiries and operate the service. No website or transmission method is risk-free. Supabase or other service providers may change as our services evolve; we will update this notice when a change materially affects how personal information is handled.</p></section>
-    <section><h2>5. Sharing and transfers</h2><p>We may make relevant information available to service providers that host or support the website and enquiry database, and to delivery or payment providers if needed for an order and disclosed to you. We may also disclose information where required by law or necessary to establish, exercise or defend legal claims. Our service providers may change over time. We require providers handling personal information to protect it and use it only to provide their services or as otherwise permitted by law.</p><p>If personal information is processed outside Kenya, we will handle the transfer in accordance with applicable safeguards under the Data Protection Act, 2019 and its regulations. When you choose WhatsApp or another external contact service, that provider processes information under its own privacy terms.</p></section>
+    <section><h2>4. How information is stored and protected</h2><p>The website does not store contact or wholesale enquiry form submissions. When you choose to send an enquiry, the form opens WhatsApp with the details you entered; the information is sent to Rebclean Solutions only if you send the message in WhatsApp. WhatsApp processes that information under its own privacy terms. We retain enquiry details received through WhatsApp only as long as needed for the purposes described in this notice, subject to legal retention requirements.</p></section>
+    <section><h2>5. Sharing and transfers</h2><p>We may make relevant information available to service providers that host or support the website, and to delivery or payment providers if needed for an order and disclosed to you. We may also disclose information where required by law or necessary to establish, exercise or defend legal claims. Our service providers may change over time. We require providers handling personal information to protect it and use it only to provide their services or as otherwise permitted by law.</p><p>If personal information is processed outside Kenya, we will handle the transfer in accordance with applicable safeguards under the Data Protection Act, 2019 and its regulations. When you choose WhatsApp or another external contact service, that provider processes information under its own privacy terms.</p></section>
     <section><h2>6. How long information is kept</h2><p>We retain personal information only for as long as needed for the purpose for which it was collected, including responding to an enquiry, completing a transaction, meeting applicable record-keeping duties, resolving disputes or protecting legal rights. When it is no longer needed, we securely delete or anonymise it, subject to legal retention requirements.</p></section>
     <section><h2>7. Your data protection rights</h2><p>Subject to the Data Protection Act, 2019 and any applicable limits, you may ask to be informed about use of your information, access it, object to processing, request correction of inaccurate information, and request erasure where the law provides that right. Where processing relies on consent, you may withdraw consent; withdrawal does not make earlier lawful processing unlawful. The Act also provides other rights in specified circumstances, including data portability.</p><p>To make a request, use the <a href="/contact">Contact Us page</a> and state that it is a privacy request. We may need to verify your identity before acting. You can also complain to the <a href="https://www.odpc.go.ke/" target="_blank" rel="noreferrer">Office of the Data Protection Commissioner (ODPC)</a> if you believe your information has been mishandled.</p></section>
     <section><h2>8. Children</h2><p>This website is intended for people making household or business product enquiries, not for children to submit personal information. A parent or guardian who believes a child has sent us personal information may contact us through the Contact Us page.</p></section>
